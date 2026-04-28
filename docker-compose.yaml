@@ -1,0 +1,23 @@
+name: auth-practice
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: auth-practice-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: auth_practice
+      TZ: UTC
+    volumes:
+      - .docker/mysql/initdb.d:/docker-entrypoint-initdb.d
+      - .docker/mysql/data:/var/lib/mysql
+      - .docker/mysql/log:/var/log
+    ports:
+      - 33066:3306
+    restart: unless-stopped
+    networks:
+      - auth-practice
+
+networks:
+  auth-practice:
+    driver: bridge
