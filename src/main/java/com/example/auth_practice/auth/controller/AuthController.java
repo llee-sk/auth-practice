@@ -3,6 +3,7 @@ package com.example.auth_practice.auth.controller;
 import com.example.auth_practice.auth.dto.response.MemberSignupResponse;
 import com.example.auth_practice.auth.service.SignUpService;
 import com.example.auth_practice.auth.dto.request.MemberSignupRequest;
+import com.example.auth_practice.global.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -22,7 +23,7 @@ public class AuthController {
 
     @Operation(summary = "회원가입")
     @PostMapping("/signup")
-    public ResponseEntity<MemberSignupResponse> signup(@Valid @RequestBody MemberSignupRequest request){
-        return ResponseEntity.ok(signUpService.signup(request));
+    public ResponseEntity<ApiResponse<MemberSignupResponse>> signup(@Valid @RequestBody MemberSignupRequest request){
+        return ResponseEntity.ok(ApiResponse.success("회원가입에 성공했습니다.", signUpService.signup(request)));
     }
 }
