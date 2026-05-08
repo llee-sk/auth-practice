@@ -1,8 +1,8 @@
 package com.example.auth_practice.auth.service;
 
-import com.example.auth_practice.auth.dto.MemberSignupRequest;
-import com.example.auth_practice.auth.dto.MemberSignupResponse;
-import com.example.auth_practice.auth.exception.DuplicationEmailException;
+import com.example.auth_practice.auth.dto.request.MemberSignupRequest;
+import com.example.auth_practice.auth.dto.response.MemberSignupResponse;
+import com.example.auth_practice.auth.exception.DuplicateEmailException;
 import com.example.auth_practice.member.Member;
 import com.example.auth_practice.member.MemberRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,7 +21,7 @@ public class SignUpService {
     public MemberSignupResponse signup(MemberSignupRequest request) {
         String email = request.getEmail().toLowerCase().trim();
         if (memberRepository.existsByEmail(email)){
-            throw new DuplicationEmailException();
+            throw new DuplicateEmailException();
         }
 
         String encodedPassword = passwordEncoder.encode(request.getPassword());

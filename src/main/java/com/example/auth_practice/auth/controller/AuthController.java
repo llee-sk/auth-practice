@@ -1,8 +1,8 @@
 package com.example.auth_practice.auth.controller;
 
-import com.example.auth_practice.auth.dto.MemberSignupResponse;
+import com.example.auth_practice.auth.dto.response.MemberSignupResponse;
 import com.example.auth_practice.auth.service.SignUpService;
-import com.example.auth_practice.auth.dto.MemberSignupRequest;
+import com.example.auth_practice.auth.dto.request.MemberSignupRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
