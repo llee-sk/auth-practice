@@ -21,7 +21,7 @@ public class SignUpService {
     public MemberSignupResponse signup(MemberSignupRequest request) {
         String email = request.getEmail().toLowerCase().trim();
         if (memberRepository.existsByEmail(email)){
-            throw new DuplicationEmailException("이미 사용 중인 이메일 입니다.");
+            throw new DuplicationEmailException();
         }
 
         String encodedPassword = passwordEncoder.encode(request.getPassword());
