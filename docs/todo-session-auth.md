@@ -150,15 +150,42 @@
   > 세션이 없거나 이미 만료된 상태에서 로그아웃 요청이 들어와도, 요청 후 로그인 상태가 아니라면 목표를 달성한 것으로 보고 성공 응답을 반환한다.
 
 
-## 5. 세션 인증 인터셉터 또는 필터 구현
+## 5. 세션 인증 인터셉터 구현
 ### 구현할 내용
-- [x] 
+- [x] 보호 API와 공개 API 구분
+  - 공개 API : `/api/login`, `/api/auth/signup`, Swagger 경로, `/error`
+  - 보호 API : `/api/members/me`, `/api/logout`
+- [x] `HandlerInterceptor` 로 세션 인증 확인
+  - 스프링 인터셉터 흐름
+    > HTTP 요청 -> WAS -> 필터 -> 서블릿 -> 스프링 인터셉터 -> 컨트롤러
+    - 인터셉터는 컨트롤러 호출 직전에 호출됨
+    - 인터셉터 호출 거절 시, 컨트롤러도 호출되지 않음
+    - WebConfig로 인터셉터 실행
 
 ### 확인 내용
+- Servlet `Filter`의 동작 위치 및 Spring MVC `HandlerInterceptor`의 동작 위치
+  > 요청 흐름은 대략 `HTTP 요청 -> WAS -> Servlet Filter -> DispatcherServlet -> HandlerInterceptor -> Controller` 순서로 진행된다.
+  >
+  > Servlet `Filter`는 `DispatcherServlet`에 요청이 도달하기 전에 실행된다. 그래서 Spring MVC 컨트롤러와 상관없이 더 앞단에서 요청/응답을 가로챌 수 있다.
+  >
+  > Spring MVC `HandlerInterceptor`는 `DispatcherServlet` 이후, 컨트롤러가 호출되기 전후에 실행된다. 즉, Spring MVC가 어떤 컨트롤러를 호출할지 찾은 뒤 컨트롤러 주변에서 동작한다.
+- Spring Security Filter Chain의 역할
+  > Spring Security Filter Chain은 Spring Security가 제공하는 보안 전용 필터들의 묶음이다.
+  >
+  > 일반 Servlet Filter처럼 DispatcherServlet보다 앞에서 동작하며, 인증/인가, CSRF 보호, 로그아웃, SecurityContext 관리, 인증 실패 처리 같은 보안 기능을 담당한다.
+- 직접 만든 인터셉터/필터와 Spring Security 인증 기능의 차이
+  > 직접 만든 인터셉터/필터는 세션에서 값을 꺼내 로그인 여부를 확인하는 식으로 인증 흐름을 직접 구현한다. 구조가 단순하고 세션 인증의 원리를 학습하기 좋지만, 보안 기능을 직접 설계하고 관리해야 한다.
+  >
+  > Spring Security 인증 기능은 `SecurityContext`, `Authentication`, `UserDetailsService`, 인증 필터, 인가 설정 등 Spring Security가 제공하는 표준 보안 구조를 사용한다. 기능은 강력하지만 처음에는 내부 흐름이 복잡하게 느껴질 수 있다.
 
+- 공개 API와 보호 API를 명확히 나누는 이유
+  > 공개 API는 로그인하지 않아도 접근할 수 있어야 하는 API이다. 예를 들어 회원가입, 로그인, Swagger 문서, 에러 경로 등이 여기에 해당한다.
+  >
+  > 보호 API는 로그인한 사용자만 접근할 수 있어야 하는 API이다. 예를 들어 현재 로그인 사용자 조회 API 같은 기능이 여기에 해당한다.
+  >
+  > 두 종류를 명확히 나누지 않으면 로그인 API까지 인증 인터셉터에 막혀 로그인을 할 수 없거나, 반대로 보호되어야 할 API가 미로그인 사용자에게 노출될 수 있다.
+  >
+  > 따라서 `WebConfig`에서 인터셉터 적용 경로와 제외 경로를 명확히 지정해, 어떤 요청을 인증 검사할지 분리해야 한다.
+  
 
 ## 6. Swagger 또는 HTTP 클라이언트로 세션 흐름 확인
-### 구현할 내용
-- [x] 
-
-### 확인 내용

@@ -3,12 +3,11 @@ package com.example.auth_practice.member.controller;
 import com.example.auth_practice.auth.session.SessionConst;
 import com.example.auth_practice.auth.session.SessionMember;
 import com.example.auth_practice.global.dto.ApiResponse;
-import com.example.auth_practice.auth.exception.LoginRequiredException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,21 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/members")
+@Slf4j
 public class MemberController {
 
     @Operation(summary = "내 정보 조회")
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<SessionMember>> getMyInfo(HttpServletRequest request){
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            throw new LoginRequiredException();
-        }
-
-        SessionMember sessionMember = (SessionMember) session.getAttribute(SessionConst.LOGIN_MEMBER);
-        if (sessionMember == null){
-            throw new LoginRequiredException();
-        }
-
+        SessionMember sessionMember = (SessionMember) request.getAttribute(SessionConst.REQUEST_MEMBER);
         return ResponseEntity.ok(ApiResponse.success("현재 로그인 사용자 조회에 성공했습니다.", sessionMember));
     }
 }
