@@ -22,7 +22,7 @@
 -[x] JWT secret/key 설정 방식을 결정
   - 알고리즘은 HS256 사용
   - secret은 코드에 하드코딩하지 않고 application.properties 또는 환경 변수로 관리
-  - 현재 프로젝트에서는 openssl rand -hex 32로 생성한 256-bit 랜덤 값을 사용
+  - 현재 프로젝트에서는 openssl rand -base64 32로 생성한 256-bit 랜덤 값을 사용
   - 실무에서는 저장소에 커밋하지 않고 환경 변수, secret manager 등으로 관리
 
 
@@ -42,8 +42,21 @@
 
 ## 2. JWT 라이브러리 및 설정 추가
 ### 구현할 내용
+-[x] `build.gradle`에 JWT 라이브러리 추가
+  - 참고 : https://github.com/jwtk/jjwt#gradle
+-[x] `application.properties` : JWT secret, Access Token 만료 시간, Refresh Token 만료 시간을 추가
+  - JWT secret key는 application.properites에 직접 넣거나
+  - 지금처럼 Java 코드에 적는 게 아니라, 애플리케이션을 실행하는 “환경”에 등록한다.
+    > - 1. openssl rand -base64 32로 secret을 한 번 생성한다.
+    > - 2. IntelliJ Run -> Edit Configurations -> Environment variables에 JWT_SECRET=생성값 을 등록한다.
+    > - 3. application.properties에는 jwt.secret=${JWT_SECRET}만 적는다.
+-[x] JWT 설정값을 주입받을 수 있는 구조 생성
+  - JwtTokenProvider
 
 ### 확인 내용
+- JWT 라이브러리로 토큰 생성, 서명, 검증을 처리한다.
+- secret은 충분히 긴 값을 사용해야 한다.
+- 운영 환경에서는 secret을 환경 변수나 외부 설정으로 관리하는 것이 좋다.
 
 
 ## 3. 토큰 응답 DTO 설계
