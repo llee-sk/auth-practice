@@ -1,9 +1,9 @@
 package com.example.auth_practice.auth.controller;
 
 import com.example.auth_practice.auth.dto.request.LoginRequest;
+import com.example.auth_practice.auth.dto.response.TokenResponse;
 import com.example.auth_practice.auth.service.LoginService;
 import com.example.auth_practice.global.dto.ApiResponse;
-import com.example.auth_practice.member.dto.response.MemberResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -20,7 +20,7 @@ public class LoginController {
 
     @Operation(summary = "로그인")
     @PostMapping
-    public ResponseEntity<ApiResponse<MemberResponse>> login(@Valid @RequestBody LoginRequest request){
-        return ResponseEntity.ok(ApiResponse.success("로그인 검증에 성공했습니다.", loginService.login(request)));
+    public ResponseEntity<ApiResponse<TokenResponse>> login(@Valid @RequestBody LoginRequest request){
+        return ResponseEntity.ok(ApiResponse.success("로그인에 성공했습니다.", loginService.login(request)));
     }
 }

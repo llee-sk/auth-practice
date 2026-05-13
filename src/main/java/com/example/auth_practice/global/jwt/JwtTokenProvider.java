@@ -1,17 +1,16 @@
-package com.example.auth_practice.global.provider;
+package com.example.auth_practice.global.jwt;
 
 import com.example.auth_practice.member.enums.MemberRole;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.util.Base64;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -19,6 +18,7 @@ public class JwtTokenProvider {
     @Value("${jwt.secret}")
     private String secretKey;
 
+    @Getter
     @Value("${jwt.access-token-expiration}")
     private long accessTokenExpirationTime;
 

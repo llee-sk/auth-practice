@@ -61,28 +61,82 @@
 
 ## 3. 토큰 응답 DTO 설계
 ### 구현할 내용
+-[x] 로그인 성공 시 반환할 토큰 응답 DTO를 만든다.
+  - TokenResponse
+  - 응답에 Access Token, Refresh Token, token type, 만료 시간 정보를 포함
 
 ### 확인 내용
+- 토큰을 응답 body로 내려줄지, header나 cookie로 내려줄지 선택할 수 있다.
+  > - `cookie`
+  >   - XSS보안을 고려해 클라이언트가 쿠키에 저장할 수 있도록 토큰을 쿠키에 넣어 클라이언트에 보낼 수는 있지만(set-cookie),
+  >    클라이언트가 토큰을 쿠키에 저장한다고 서버에서도 쿠키에 저장할 필요는 없다.
+  >   - 또한, Storage에 Cookie 저장이 되지 않는 이슈가 있다.
+  >   - 대부분은 `body`에 담아서 응답한다.
+  > 
+  > - 참고 : https://velog.io/@nathan29849/JWT%EB%A5%BC-Header%EC%97%90-Body%EC%97%90
 
 
 ## 4. JWT 발급 로직 구현
 ### 구현할 내용
+-[x] `JwtTokenProvider` 또는 비슷한 역할의 컴포넌트를 만든다.
+-[x] 기존 로그인 검증 로직을 재사용해 로그인 성공 시 토큰을 발급한다.
+  - TokenResponse 사용
 ### 확인 내용
+- 토큰 발급은 로그인 검증과 분리하면 역할이 명확해진다.
+- Access Token에는 인증에 필요한 최소 정보만 담는다.
+- Refresh Token에는 식별 가능한 최소 claim과 만료 시간 정도만 담는 것이 좋다.
 
 
 ## 5. Refresh Token 엔티티 및 저장 구조 구현
 ### 구현할 내용
+-[x] Refresh Token 엔티티, Repository 생성
+-[x] Member와 Refresh Token의 관계 결정
+-[ ] Refresh Token 문자열과 만료 시간을 DB에 저장
+-[ ] 재로그인 시 기존 Refresh Token 처리 정책 구현
 ### 확인 내용
+- Refresh Token을 DB에 저장하면 서버에서 재발급 가능 여부를 제어할 수 있다.
+- 학습용으로는 회원 1명당 Refresh Token 1개 정책이 단순하다.
+- 재로그인 시 기존 Refresh Token을 삭제하거나 새 값으로 교체할 수 있다.
+- Refresh Token 만료 시간은 JWT 자체의 만료 시간과 DB 저장 만료 시간이 일치해야 한다.
+
+### 완료 기준
+- 로그인 성공 시 Refresh Token이 DB에 저장된다.
+- Refresh Token에는 회원 정보, 토큰 값, 만료 시간이 기록된다.
+- 재로그인 시 기존 Refresh Token 처리 정책이 동작한다.
 
 
 ## 6. JWT 인증 필터 구현
 ### 구현할 내용
+-[x] JWT 인증 필터 JwtAuthenticationFilter 생성
+  - Authorization 헤더에서 Bearer Token을 추출
+  - Access Token 검증
+  - 검증 성공 시 현재 사용자 정보를 `SecurityContextHolder`에 설정
+-[x] Security Filter Chain에 JWT 인증 필터를 등록한다.
+
 ### 확인 내용
+- JWT 인증 필터의 역할
+  > HTTP 요청의 Authorization 헤더에 들어온 JWT를 검증하고,
+  > Spring Security가 이해할 수 있는 인증 객체로 바꿔서 등록한다.
+- JWT 인증 필터 흐름
+  > Authorization 헤더에서 JWT 추출
+  -> JWT 검증
+  -> sub에서 memberId 추출
+  -> UserDetailsService로 회원 조회
+  -> UserDetails 생성
+  -> UsernamePasswordAuthenticationToken 생성
+  -> 요청 부가 정보 설정
+  -> SecurityContextHolder에 인증 등록
+  -> 다음 필터로 진행
+- JWT 인증은 요청마다 Access Token을 검증하는 방식이다.
+- `Authorization: Bearer {token}` 형식을 사용한다.
+- Spring Security에서 인증된 사용자 정보는 `SecurityContextHolder`에 저장된다.
+- 필터에서 발생한 예외는 `GlobalExceptionHandler`로 바로 처리되지 않을 수 있다.
 
 
 ## 7. 현재 로그인 사용자 조회 API 구현
 ### 구현할 내용
 ### 확인 내용
+
 
 ## 8. Access Token 재발급 API 구현
 ### 구현할 내용
