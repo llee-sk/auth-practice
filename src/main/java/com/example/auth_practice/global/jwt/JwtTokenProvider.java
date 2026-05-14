@@ -22,6 +22,7 @@ public class JwtTokenProvider {
     @Value("${jwt.access-token-expiration}")
     private long accessTokenExpirationTime;
 
+    @Getter
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenExpirationTime;
 

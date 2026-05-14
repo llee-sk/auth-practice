@@ -78,7 +78,7 @@
 
 ## 4. JWT 발급 로직 구현
 ### 구현할 내용
--[x] `JwtTokenProvider` 또는 비슷한 역할의 컴포넌트를 만든다.
+-[x] `JwtTokenProvider` 생성
 -[x] 기존 로그인 검증 로직을 재사용해 로그인 성공 시 토큰을 발급한다.
   - TokenResponse 사용
 ### 확인 내용
@@ -91,18 +91,15 @@
 ### 구현할 내용
 -[x] Refresh Token 엔티티, Repository 생성
 -[x] Member와 Refresh Token의 관계 결정
--[ ] Refresh Token 문자열과 만료 시간을 DB에 저장
--[ ] 재로그인 시 기존 Refresh Token 처리 정책 구현
+-[x] Refresh Token 문자열과 만료 시간을 DB에 저장
+  - 회원 정보(member), 토큰 값, 만료 시간 저장
+-[x] 재로그인 시 기존 Refresh Token 처리 정책 구현
+  - 현재 프로젝트에서는 재로그인 시 기존 Refresh Token을 새 값으로 교체하는 방향으로 구현
+  - 회원 1명당 Refresh Token 1개 정책으로 정함
 ### 확인 내용
 - Refresh Token을 DB에 저장하면 서버에서 재발급 가능 여부를 제어할 수 있다.
-- 학습용으로는 회원 1명당 Refresh Token 1개 정책이 단순하다.
 - 재로그인 시 기존 Refresh Token을 삭제하거나 새 값으로 교체할 수 있다.
 - Refresh Token 만료 시간은 JWT 자체의 만료 시간과 DB 저장 만료 시간이 일치해야 한다.
-
-### 완료 기준
-- 로그인 성공 시 Refresh Token이 DB에 저장된다.
-- Refresh Token에는 회원 정보, 토큰 값, 만료 시간이 기록된다.
-- 재로그인 시 기존 Refresh Token 처리 정책이 동작한다.
 
 
 ## 6. JWT 인증 필터 구현
@@ -135,7 +132,19 @@
 
 ## 7. 현재 로그인 사용자 조회 API 구현
 ### 구현할 내용
+-[ ] 현재 로그인 사용자를 조회하는 API를 만든다.
+-[ ] Access Token에서 식별한 회원 id 또는 email을 기반으로 회원을 조회한다.
+-[ ] 기존 `MemberResponse`를 재사용하거나 필요한 응답 DTO를 만든다.
 ### 확인 내용
+- 컨트롤러에서 인증된 사용자 정보를 받는 방법을 선택해야 한다.
+- 토큰의 subject만 믿을지, DB에서 회원 상태를 다시 확인할지 결정해야 한다.
+- 탈퇴 또는 비활성화 회원 처리도 인증 흐름과 연결된다.
+
+### 완료 기준
+
+- Access Token이 있으면 내 정보를 조회할 수 있다.
+- Access Token이 없으면 인증 실패 응답이 반환된다.
+- 잘못된 Access Token이면 인증 실패 응답이 반환된다.
 
 
 ## 8. Access Token 재발급 API 구현

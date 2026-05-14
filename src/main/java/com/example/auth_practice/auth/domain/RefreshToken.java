@@ -2,9 +2,7 @@ package com.example.auth_practice.auth.domain;
 
 import com.example.auth_practice.member.Member;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.Instant;
 
