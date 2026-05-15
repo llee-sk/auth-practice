@@ -1,5 +1,7 @@
 package com.example.auth_practice.global.jwt;
 
+import com.example.auth_practice.global.jwt.exception.InvalidJwtTokenException;
+import com.example.auth_practice.global.jwt.exception.JwtTokenExpiredException;
 import com.example.auth_practice.member.enums.MemberRole;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -72,22 +74,18 @@ public class JwtTokenProvider {
         return Long.valueOf(subject);
     }
 
-    public boolean validateToken(String token) {
+    public void validateToken(String token) {
         try {
             Jwts.parser()
                     .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(token);
-            return true;
-        } catch (SecurityException | MalformedJwtException e) {
-            log.info("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException e) {
-            log.info("만료된 JWT 토큰입니다.");
-        } catch (UnsupportedJwtException e) {
-            log.info("지원되지 않는 JWT 토큰입니다.");
+            throw new JwtTokenExpiredException();
+        } catch (SecurityException | MalformedJwtException e) {
+            throw new InvalidJwtTokenException();
         } catch (JwtException | IllegalArgumentException e) {
-            log.info("JWT 토큰이 잘못되었습니다.");
+            throw new InvalidJwtTokenException();
         }
-        return false;
     }
 }

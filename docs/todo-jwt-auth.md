@@ -176,25 +176,33 @@
 ### 확인 내용
 - JWT Access Token은 서버가 상태를 저장하지 않기 때문에 즉시 폐기하기 어렵다.
 - Refresh Token은 DB에서 삭제하거나 무효화하면 추가 재발급을 막을 수 있다.
-- 삭제 방식은 단순하고 Refresh Token 제어 흐름을 이해하기 쉽다.
-- 삭제 방식은 로그아웃 이력이 남지 않는다는 한계가 있다.
-- 무효화 방식은 `revoked`, `revokedAt` 같은 상태를 남겨 로그아웃 이력과 토큰 상태를 추적할 수 있다.
-- 무효화 방식은 삭제 방식 구현 후 고도화 학습 항목으로 남긴다.
-- Access Token 만료 시간을 짧게 잡는 이유를 이해해야 한다.
+  > `삭제 방식`
+  > - 단순하고 Refresh Token 제어 흐름을 이해하기 쉽다.
+  > - 삭제 방식은 로그아웃 이력이 남지 않는다는 한계가 있다.
+  > 
+  > `무효화 방식`
+  > - `revoked`, `revokedAt` 같은 상태를 남겨 로그아웃 이력과 토큰 상태를 추적할 수 있다.
+  > - 무효화 방식은 삭제 방식 구현 후 고도화 학습 항목으로 남긴다.
 - Access Token까지 즉시 차단하려면 Redis 또는 DB 기반 블랙리스트를 사용할 수 있지만, 현재 프로젝트에서는 고도화 단계로 남긴다.
 - Redis 블랙리스트 방식은 로그아웃된 Access Token을 남은 만료 시간만큼 저장하고, 요청마다 블랙리스트 여부를 확인하는 방식이다.
-
-### 완료 기준
-- 로그아웃 요청 시 DB에 저장된 Refresh Token이 삭제된다.
-- 로그아웃 후 같은 Refresh Token으로 재발급 요청을 하면 실패한다.
-- 삭제된 Refresh Token으로 재발급 요청 시 `REFRESH_TOKEN_NOT_FOUND` 흐름을 확인할 수 있다.
-- 이미 발급된 Access Token의 남은 유효 시간에 대한 정책을 설명할 수 있다.
 
 
 ## 10. 예외 처리 연결
 ### 구현할 내용
+-[x] JWT 관련 `ErrorCode`를 추가한다.
+-[x] 토큰 없음, 토큰 만료, 토큰 위조/서명 불일치 예외를 구분한다.
+-[x] Refresh Token 없음, Refresh Token 만료, Refresh Token 불일치 예외를 구분한다.
+-[x] JWT 필터에서 발생한 인증 실패를 기존 `ErrorResponse` 형식과 연결한다.
 ### 확인 내용
+- 인증 실패는 일반 비즈니스 예외와 처리 위치가 다를 수 있다.
+- Spring Security의 `AuthenticationEntryPoint`를 사용할 수 있다.
+- 공통 응답 구조를 유지하면 클라이언트가 실패 응답을 일관되게 처리할 수 있다.
+
 
 ## 11. 테스트 및 Swagger/HTTP 클라이언트 확인
-### 구현할 내용
 ### 확인 내용
+- 로그인 후 Access Token과 Refresh Token 발급을 확인한다.
+- Access Token으로 현재 로그인 사용자 조회를 확인한다.
+- Access Token 만료 후 Refresh Token으로 재발급을 확인한다.
+- 재발급된 Access Token으로 다시 내 정보 조회를 확인한다.
+- 로그아웃 후 Refresh Token 재사용 실패를 확인한다.

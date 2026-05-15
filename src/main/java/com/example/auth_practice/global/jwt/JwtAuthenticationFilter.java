@@ -1,5 +1,8 @@
 package com.example.auth_practice.global.jwt;
 
+import com.example.auth_practice.global.exception.ErrorCode;
+import com.example.auth_practice.global.jwt.exception.InvalidJwtTokenException;
+import com.example.auth_practice.global.jwt.exception.JwtTokenExpiredException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,24 +28,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = resolveToken(request);
 
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(String.valueOf(memberId));
+        try {
+            if (token != null){
+                jwtTokenProvider.validateToken(token);
 
-            // 누가 인증됐는지, 어떤 권한인지
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-            );
+                Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(String.valueOf(memberId));
 
-            // 그 인증이 어떤 요청에서 왔는지 부가 정보
-            authentication.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                authentication.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        } catch (JwtTokenExpiredException e){
+            request.setAttribute("exception", ErrorCode.ACCESS_TOKEN_EXPIRED);
+        } catch (InvalidJwtTokenException e){
+            request.setAttribute("exception", ErrorCode.INVALID_ACCESS_TOKEN);
         }
+
         filterChain.doFilter(request, response);
     }
 

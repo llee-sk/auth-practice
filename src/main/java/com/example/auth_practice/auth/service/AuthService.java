@@ -3,10 +3,13 @@ package com.example.auth_practice.auth.service;
 import com.example.auth_practice.auth.domain.RefreshToken;
 import com.example.auth_practice.auth.dto.response.TokenResponse;
 import com.example.auth_practice.auth.exception.InvalidRefreshTokenException;
+import com.example.auth_practice.auth.exception.RefreshTokenExpiredException;
 import com.example.auth_practice.auth.exception.RefreshTokenMismatchException;
 import com.example.auth_practice.auth.exception.RefreshTokenNotFoundException;
 import com.example.auth_practice.auth.repository.RefreshTokenRepository;
 import com.example.auth_practice.global.jwt.JwtTokenProvider;
+import com.example.auth_practice.global.jwt.exception.InvalidJwtTokenException;
+import com.example.auth_practice.global.jwt.exception.JwtTokenExpiredException;
 import com.example.auth_practice.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +27,6 @@ public class AuthService {
     @Transactional
     public TokenResponse reissue(String requestRefreshToken) {
         validateRefreshToken(requestRefreshToken);
-
         RefreshToken savedRefreshToken = getRefreshToken(requestRefreshToken);
 
         Member member = savedRefreshToken.getMember();
@@ -53,7 +55,15 @@ public class AuthService {
     }
 
     private void validateRefreshToken(String requestRefreshToken) {
-        if (!StringUtils.hasText(requestRefreshToken) || !jwtTokenProvider.validateToken(requestRefreshToken)) {
+        if (!StringUtils.hasText(requestRefreshToken)) {
+            throw new InvalidRefreshTokenException();
+        }
+
+        try {
+            jwtTokenProvider.validateToken(requestRefreshToken);
+        } catch (JwtTokenExpiredException e){
+            throw new RefreshTokenExpiredException();
+        } catch (InvalidJwtTokenException e){
             throw new InvalidRefreshTokenException();
         }
     }
