@@ -37,4 +37,12 @@ public class AuthController {
         String refreshToken = request.getRefreshToken();
         return ResponseEntity.ok(ApiResponse.success("Access Token 재발급 성공했습니다.", authService.reissue(refreshToken)));
     }
+
+    @Operation(summary = "로그아웃")
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody RefreshTokenRequest request){
+        String refreshToken = request.getRefreshToken();
+        authService.logout(refreshToken);
+        return ResponseEntity.ok(ApiResponse.success("로그아웃 성공", null));
+    }
 }

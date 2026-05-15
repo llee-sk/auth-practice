@@ -165,7 +165,30 @@
 
 ## 9. 로그아웃 API 구현
 ### 구현할 내용
+-[x] 로그아웃 API 구현
+  - 요청으로 받은 Refresh Token을 검증
+  - DB에 저장된 Refresh Token과 비교 후 로그아웃 시 DB에 저장된 Refresh Token row를 삭제한다.
+-[x] 로그아웃 후 같은 Refresh Token으로 access Token 재발급 X
+  - 현재 프로젝트에서는 학습을 위해 먼저 Refresh Token 삭제 방식으로 구현한다.
+  - 삭제 방식에서는 로그아웃 후 DB에 Refresh Token 정보가 남지 않는다.
+  - 추후 고도화 단계에서 `revoked`, `revokedAt` 필드를 추가해 삭제 대신 무효화 방식으로 변경한다.
+
 ### 확인 내용
+- JWT Access Token은 서버가 상태를 저장하지 않기 때문에 즉시 폐기하기 어렵다.
+- Refresh Token은 DB에서 삭제하거나 무효화하면 추가 재발급을 막을 수 있다.
+- 삭제 방식은 단순하고 Refresh Token 제어 흐름을 이해하기 쉽다.
+- 삭제 방식은 로그아웃 이력이 남지 않는다는 한계가 있다.
+- 무효화 방식은 `revoked`, `revokedAt` 같은 상태를 남겨 로그아웃 이력과 토큰 상태를 추적할 수 있다.
+- 무효화 방식은 삭제 방식 구현 후 고도화 학습 항목으로 남긴다.
+- Access Token 만료 시간을 짧게 잡는 이유를 이해해야 한다.
+- Access Token까지 즉시 차단하려면 Redis 또는 DB 기반 블랙리스트를 사용할 수 있지만, 현재 프로젝트에서는 고도화 단계로 남긴다.
+- Redis 블랙리스트 방식은 로그아웃된 Access Token을 남은 만료 시간만큼 저장하고, 요청마다 블랙리스트 여부를 확인하는 방식이다.
+
+### 완료 기준
+- 로그아웃 요청 시 DB에 저장된 Refresh Token이 삭제된다.
+- 로그아웃 후 같은 Refresh Token으로 재발급 요청을 하면 실패한다.
+- 삭제된 Refresh Token으로 재발급 요청 시 `REFRESH_TOKEN_NOT_FOUND` 흐름을 확인할 수 있다.
+- 이미 발급된 Access Token의 남은 유효 시간에 대한 정책을 설명할 수 있다.
 
 
 ## 10. 예외 처리 연결
@@ -175,4 +198,3 @@
 ## 11. 테스트 및 Swagger/HTTP 클라이언트 확인
 ### 구현할 내용
 ### 확인 내용
-

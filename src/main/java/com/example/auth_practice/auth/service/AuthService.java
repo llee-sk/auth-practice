@@ -23,15 +23,9 @@ public class AuthService {
 
     @Transactional
     public TokenResponse reissue(String requestRefreshToken) {
-        if (!StringUtils.hasText(requestRefreshToken) || !jwtTokenProvider.validateToken(requestRefreshToken)) {
-            throw new InvalidRefreshTokenException();
-        }
+        validateRefreshToken(requestRefreshToken);
 
-        Long memberId = jwtTokenProvider.getMemberIdFromToken(requestRefreshToken);
-        RefreshToken savedRefreshToken = refreshTokenRepository.findById(memberId).orElseThrow(RefreshTokenNotFoundException::new);
-        if (!savedRefreshToken.getRefreshToken().equals(requestRefreshToken)) {
-            throw new RefreshTokenMismatchException();
-        }
+        RefreshToken savedRefreshToken = getRefreshToken(requestRefreshToken);
 
         Member member = savedRefreshToken.getMember();
         String accessToken = jwtTokenProvider.createAccessToken(member.getId(), member.getEmail(), member.getRole());
@@ -47,5 +41,28 @@ public class AuthService {
                 reissuedRefreshToken,
                 jwtTokenProvider.getAccessTokenExpirationTime()
         );
+    }
+
+    private RefreshToken getRefreshToken(String requestRefreshToken) {
+        Long memberId = jwtTokenProvider.getMemberIdFromToken(requestRefreshToken);
+        RefreshToken savedRefreshToken = refreshTokenRepository.findById(memberId).orElseThrow(RefreshTokenNotFoundException::new);
+        if (!savedRefreshToken.getRefreshToken().equals(requestRefreshToken)) {
+            throw new RefreshTokenMismatchException();
+        }
+        return savedRefreshToken;
+    }
+
+    private void validateRefreshToken(String requestRefreshToken) {
+        if (!StringUtils.hasText(requestRefreshToken) || !jwtTokenProvider.validateToken(requestRefreshToken)) {
+            throw new InvalidRefreshTokenException();
+        }
+    }
+
+    @Transactional
+    public void logout(String requestRefreshToken) {
+        validateRefreshToken(requestRefreshToken);
+        RefreshToken savedRefreshToken = getRefreshToken(requestRefreshToken);
+
+        refreshTokenRepository.delete(savedRefreshToken);
     }
 }
