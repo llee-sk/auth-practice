@@ -132,24 +132,35 @@
 
 ## 7. 현재 로그인 사용자 조회 API 구현
 ### 구현할 내용
--[ ] 현재 로그인 사용자를 조회하는 API를 만든다.
--[ ] Access Token에서 식별한 회원 id 또는 email을 기반으로 회원을 조회한다.
--[ ] 기존 `MemberResponse`를 재사용하거나 필요한 응답 DTO를 만든다.
+-[x] 내 정보 조회하는 API 구현
+  - MemberController.getMyInfo();
+  - Authentication로 구현
 ### 확인 내용
-- 컨트롤러에서 인증된 사용자 정보를 받는 방법을 선택해야 한다.
-- 토큰의 subject만 믿을지, DB에서 회원 상태를 다시 확인할지 결정해야 한다.
-- 탈퇴 또는 비활성화 회원 처리도 인증 흐름과 연결된다.
-
-### 완료 기준
-
-- Access Token이 있으면 내 정보를 조회할 수 있다.
-- Access Token이 없으면 인증 실패 응답이 반환된다.
-- 잘못된 Access Token이면 인증 실패 응답이 반환된다.
+- 컨트롤러에서 인증된 사용자 정보를 받는 방법
+  > Authentication 사용, authentication.getName()으로 memberId 추출
+- 토큰의 subject만 믿을지, DB에서 회원 상태를 다시 확인할지
+  > MemberService에서 findByIdAndStatus(id, ACTIVE)로 재확인
+- 탈퇴 또는 비활성화 회원 처리
+  > ACTIVE가 아니면 MemberNotFoundException 흐름으로 처리
 
 
 ## 8. Access Token 재발급 API 구현
 ### 구현할 내용
+-[x] Access Token 재발급 요청 DTO를 만든다.
+  - Access Token 재발급 요청 시, requestBody, header, cookie로 구현 가능
+  - 실무에서는 Refresh Token을 HttpOnly Cookie에 담는 방식을 많이 사용하지만
+  - 현재 프로젝트의 TokenResponse body 방식은 쿠키가 아니기 때문에 요청 DTO로 구현
+-[x] 요청으로 받은 Refresh Token을 검증한다.
+-[x] DB에 저장된 Refresh Token과 비교한다.
+-[x] Refresh Token이 유효하면 새 Access Token을 발급한다.
 ### 확인 내용
+- Refresh Token은 JWT 검증만으로 끝내지 않고 DB 저장 값과 비교한다.
+- DB에 없거나 값이 다르면 재발급을 거부한다.
+- Refresh Token이 만료되면 다시 로그인해야 한다.
+- Access Token만 새로 발급할지, Refresh Token도 함께 회전할지 정책을 정할 수 있다.
+  > 현재 프로젝트는 재발급 시 Access Token과 Refresh Token을 모두 새로 발급한다. (RefreshToken rotation)
+  기존 Refresh Token은 DB에서 새 값으로 교체되어 재사용할 수 없다.
+  > 따라서 이전 Refresh Token을 다시 사용하면 REFRESH_TOKEN_MISMATCH가 발생한다.
 
 
 ## 9. 로그아웃 API 구현

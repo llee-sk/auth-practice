@@ -1,6 +1,7 @@
 package com.example.auth_practice.auth.controller;
 
 import com.example.auth_practice.auth.dto.request.LoginRequest;
+import com.example.auth_practice.auth.dto.request.RefreshTokenRequest;
 import com.example.auth_practice.auth.dto.response.TokenResponse;
 import com.example.auth_practice.auth.service.LoginService;
 import com.example.auth_practice.global.dto.ApiResponse;
@@ -14,12 +15,11 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "로그인 컨트롤러")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/login")
 public class LoginController {
     private final LoginService loginService;
 
     @Operation(summary = "로그인")
-    @PostMapping
+    @PostMapping("/api/login")
     public ResponseEntity<ApiResponse<TokenResponse>> login(@Valid @RequestBody LoginRequest request){
         return ResponseEntity.ok(ApiResponse.success("로그인에 성공했습니다.", loginService.login(request)));
     }
